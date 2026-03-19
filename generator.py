@@ -1,38 +1,27 @@
 import random
-from docx import Document
 
-def split_variants(words):
+def generate_tests(words, level):
     random.shuffle(words)
-    mid = len(words)//2
-    return words[:mid], words[mid:]
 
-def generate_doc(words, level, variant):
-    doc = Document()
+    split = len(words) // 2
+    a_words = words[:split]
+    b_words = words[split:]
 
-    doc.add_heading(f"Quiz {variant} ({level})", 0)
+    def format_words(word_list):
+        return "\n".join([f"{t}" for t, _ in word_list])
 
-    # A1–A2 → translation
-    if level in ["A1", "A2"]:
-        doc.add_heading("Translate into English", 1)
-        for i, (_, rus) in enumerate(words):
-            doc.add_paragraph(f"{i+1}. {rus} — ______")
+    test_a = f"Translate into English (Level {level}):\n\n" + format_words(a_words)
+    test_b = f"Translate into English (Level {level}):\n\n" + format_words(b_words)
 
-    # Writing
-    doc.add_heading("Writing", 1)
-    word_bank = ", ".join([w[0] for w in words])
-    doc.add_paragraph(f"Use 3–5 words: {word_bank}")
-    doc.add_paragraph("How can people improve their lifestyle?")
+    # Writing task
+    writing_words = random.sample(words, min(5, len(words)))
+    writing_task = "Use 3-5 words to write sentences:\n\n" + ", ".join([w[0] for w in writing_words])
 
-    # Speaking
-    doc.add_heading("Speaking", 1)
-    doc.add_paragraph("Use at least 2 words from the list.")
-    doc.add_paragraph("Why is this topic important today?")
+    answers = "\n".join([f"{t} - {tr}" for t, tr in words])
 
-    # Answer key
-    doc.add_page_break()
-    doc.add_heading("Answer Key", 0)
-
-    for i, (eng, rus) in enumerate(words):
-        doc.add_paragraph(f"{i+1}. {rus} → {eng}")
-
-    return doc
+    return {
+        "test_a": test_a,
+        "test_b": test_b,
+        "writing": writing_task,
+        "answers": answers
+    }
