@@ -1,32 +1,42 @@
 import streamlit as st
-from parser import parse_quizlet
-from generator import split_variants, generate_doc
-
-st.set_page_config(page_title="Quiz Generator")
+from generator import generate_tests
 
 st.title("📘 Quiz Generator")
 
-url = st.text_input("Paste Quizlet link")
-level = st.selectbox("Level", ["A1", "A2", "B1", "B2"])
+text_input = st.text_area(
+    "Paste words (term - translation):",
+    height=200
+)
+
+level = st.selectbox("Select level", ["A1", "A2"])
 
 if st.button("Generate"):
-    words = parse_quizlet(url)
+    lines = text_input.split("\n")
+
+    words = []
+    for line in lines:
+        if "-" in line:
+            term, translation = line.split("-", 1)
+            term = term.strip()
+            translation = translation.strip()
+
+            # фильтр: убираем длинные предложения
+            if len(term.split()) <= 3:
+                words.append((term, translation))
 
     if not words:
-        st.error("No words found")
+        st.error("No suitable words found")
     else:
-        st.success(f"{len(words)} words loaded")
+        result = generate_tests(words, level)
 
-        a, b = split_variants(words)
+        st.subheader("📝 Test A")
+        st.text(result["test_a"])
 
-        docA = generate_doc(a, level, "A")
-        docB = generate_doc(b, level, "B")
+        st.subheader("📝 Test B")
+        st.text(result["test_b"])
 
-        docA.save("A.docx")
-        docB.save("B.docx")
+        st.subheader("✏️ Writing (use 3-5 words)")
+        st.text(result["writing"])
 
-        with open("A.docx", "rb") as f:
-            st.download_button("Download A", f)
-
-        with open("B.docx", "rb") as f:
-            st.download_button("Download B", f)
+        st.subheader("🔑 Answer Key")
+        st.text(result["answers"])
