@@ -1,59 +1,23 @@
 import streamlit as st
-from generator import generate_tests
+from parser import parse_input
+from generator import generate_tasks
 
-st.title("📘 Quiz Generator")
+st.title("Quiz Generator for Teachers")
 
-# Функция очистки слова/фразы
-def clean_term(term):
-    term = term.strip()
+# Ввод
+text_input = st.text_area("Paste Quizlet words here")
 
-    # убираем скобки (всё после них)
-    if "(" in term:
-        term = term.split("(")[0].strip()
-
-    # убираем варианты через слэш (берём первую часть)
-    if "/" in term:
-        term = term.split("/")[0].strip()
-
-    # убираем лишние пробелы
-    term = " ".join(term.split())
-
-    # фильтр: слишком длинные выражения
-    if len(term.split()) > 4:
-        return None
-
-    return term
-
-
-# Ввод текста
-text_input = st.text_area(
-    "Paste vocabulary (term - translation):",
-    height=250,
-    placeholder="a T-shirt - футболка"
-)
-
-# Выбор уровня
+# Уровень
 level = st.selectbox("Select level", ["A1", "A2"])
 
 if st.button("Generate"):
-    lines = text_input.split("\n")
 
-    words = []
-
-    for line in lines:
-        if "-" in line:
-            term, translation = line.split("-", 1)
-
-            term = clean_term(term)
-            translation = translation.strip()
-
-            if term and translation:
-                words.append((term, translation))
+    words = parse_input(text_input)
 
     if not words:
-        st.error("No valid words found. Check your input format.")
+        st.error("No valid word pairs found")
     else:
-        result = generate_tests(words, level)
+        result = generate_tasks(words, level)
 
         st.subheader("📝 Test A")
         st.text(result["test_a"])
