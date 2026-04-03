@@ -1,30 +1,39 @@
-from openai import OpenAI
+import requests
 import os
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-xl"
+headers = {"Authorization": f"Bearer {os.getenv('HF_API_KEY')}"}
+
+def query(payload):
+    response = requests.post(API_URL, headers=headers, json=payload)
+    return response.json()
 
 def generate_ai_tasks(words, level):
-
     word_list = ", ".join([w[0] for w in words])
 
     prompt = f"""
-Create ESL tasks.
+Create ESL exercises for students.
 
-Level: {level}
-Words: {word_list}
+Level: {level} (A1, A2, B1, B2)
+Words to use: {word_list}
 
-1. Writing:
-Write 2 simple questions. Student answers using the words.
+Instructions:
+1. Writing: generate 2 simple questions. Student should answer using the given words. Each answer 3–5 sentences.
+2. Speaking: generate 3 discussion questions using the words.
+3. Do NOT use Present Participles or vague "this" questions.
+4. Keep sentences short and simple.
 
-2. Speaking:
-Write 3 discussion questions using the words.
-
-Use simple English. No vague questions.
+Output in plain text.
 """
 
-    response = client.chat.completions.create(
-        model="gpt-4.1-mini",
-        messages=[{"role": "user", "content": prompt}]
-    )
+    try:
+        output = query({
+            "inputs": prompt,
+            "parameters": {"max_length": 300}
+        })
+        return output[0]["generated_text"]
 
-    return response.choices[0].message.content
+    except:
+        # fallback если AI не отвечает
+        fallback = f"Use these words:\n\n{word_list}\n\nWrite 5 sentences with these words."
+        return fallback
