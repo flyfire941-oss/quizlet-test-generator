@@ -3,4 +3,3 @@ requests
 beautifulsoup4
 python-docx
 pandas
-openai
