@@ -1,36 +1,54 @@
 import streamlit as st
-from generator import parse_words, generate_tasks
+from generator import parse_words, generate_tasks, generate_pdf
 
-st.set_page_config(page_title="Vocabulary Task Generator", layout="wide")
+st.set_page_config(page_title="Vocabulary Worksheet Generator", layout="centered")
 
-st.title("Vocabulary Task Generator")
-st.caption("Create simple classroom activities from a list of words")
+st.title("Vocabulary Worksheet Generator")
+st.caption("Create printable classroom activities in seconds")
 
-st.write("Enter your word list below. You can use English–Russian or Russian–English pairs, one per line.")
+st.divider()
+
+st.markdown("### Enter your word list")
+st.write("Add your words below. Use English–Russian or Russian–English pairs, one per line.")
 
 words_input = st.text_area(
     "Example:\ncat - кот\nяблоко apple",
-    height=250
+    height=200
 )
 
-if st.button("Generate"):
+st.divider()
+
+if st.button("Generate worksheet"):
     if not words_input.strip():
-        st.warning("Please paste some words first!")
+        st.warning("Please enter some words first.")
     else:
         word_pairs = parse_words(words_input)
+
         if not word_pairs:
-            st.error("No valid words found. Please check your input.")
+            st.error("No valid words found. Please check your input format.")
         else:
-            translate_text, write_text, discuss_text, answer_key_text = generate_tasks(word_pairs)
+            translate, write, discuss, answers = generate_tasks(word_pairs)
 
-            st.subheader("Translate")
-            st.text(translate_text)
+            st.markdown("### Worksheet Preview")
 
-            st.subheader("Write")
-            st.text(write_text)
+            st.markdown("**Translate**")
+            st.text(translate)
 
-            st.subheader("Discuss")
-            st.text(discuss_text)
+            st.markdown("**Write**")
+            st.text(write)
 
-            st.subheader("🔑 Answer Key")
-            st.text(answer_key_text)
+            st.markdown("**Discuss**")
+            st.text(discuss)
+
+            st.markdown("**🔑 Answer Key**")
+            st.text(answers)
+
+            pdf_file = generate_pdf(translate, write, discuss, answers)
+
+            with open(pdf_file, "rb") as f:
+                st.download_button(
+                    label="Download Worksheet as PDF",
+                    data=f,
+                    file_name="worksheet.pdf",
+                    mime="application/pdf"
+                )
