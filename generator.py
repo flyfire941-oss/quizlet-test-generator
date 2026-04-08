@@ -1,25 +1,46 @@
-import random
-from ai_generator import generate_ai_tasks
+def parse_words(input_text):
+    """
+    Разбирает текст:
+    - English<TAB>Russian
+    - Russian<TAB>English
+    - через пробелы
+    - через дефис
+    """
+    word_pairs = []
+    for line in input_text.strip().split("\n"):
+        if not line.strip():
+            continue
+        if "\t" in line:
+            parts = line.split("\t")
+        elif "-" in line:
+            parts = line.split("-", 1)
+        else:
+            parts = line.split(maxsplit=1)
+        if len(parts) == 2:
+            word1 = parts[0].strip()
+            word2 = parts[1].strip()
+            # Определяем, что английское слово (латиница)
+            if any(c.isalpha() and c in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" for c in word1):
+                eng, rus = word1, word2
+            else:
+                eng, rus = word2, word1
+            word_pairs.append((eng, rus))
+    return word_pairs
 
-def generate_tasks(words, level):
-    random.shuffle(words)
-    selected_words = words[:10]  # до 10 слов
 
-    # Test A — перевод с русского на английский
-    test = "Translate into English:\n\n"
-    for eng, rus in selected_words:
-        test += f"{rus}\n"
+def generate_tasks(word_pairs):
+    # Translate
+    translate_words = [pair[1] for pair in word_pairs]  # русские слова
+    translate_text = "\n".join(translate_words)
 
-    # AI задания (Writing + Speaking)
-    ai_tasks = generate_ai_tasks(selected_words, level)
+    # Write
+    write_words = [pair[0] for pair in word_pairs][:10]  # до 10 английских слов
+    write_text = f"Write 5 sentences using these words:\n{', '.join(write_words)}"
+
+    # Discuss
+    discuss_text = f"Use these words to make your own examples and discuss them with a partner:\n{', '.join(write_words)}"
 
     # Answer Key
-    answers = "Answer Key:\n\n"
-    for eng, rus in selected_words:
-        answers += f"{eng} - {rus}\n"
+    answer_key_text = "\n".join([f"{eng} - {rus}" for eng, rus in word_pairs])
 
-    return {
-        "test": test,
-        "writing": ai_tasks,
-        "answers": answers
-    }
+    return translate_text, write_text, discuss_text, answer_key_text
