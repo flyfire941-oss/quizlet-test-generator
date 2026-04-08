@@ -1,15 +1,17 @@
 import streamlit as st
 from generator import parse_words, generate_tasks
 
-st.set_page_config(page_title="Quiz Generator", layout="wide")
-st.title("Quiz Generator")
+st.set_page_config(page_title="Vocabulary Task Generator", layout="wide")
+
+st.title("Vocabulary Task Generator")
+st.caption("Create simple classroom activities from a list of words")
+
+st.write("Enter your word list below. You can use English–Russian or Russian–English pairs, one per line.")
 
 words_input = st.text_area(
-    "Paste your words (English or Russian TAB/SPACE/RUS-ENG), one per line:",
+    "Example:\ncat - кот\nяблоко apple",
     height=250
 )
-
-level = st.selectbox("Select Level", ["A1", "A2", "B1", "B2"])
 
 if st.button("Generate"):
     if not words_input.strip():
@@ -21,14 +23,14 @@ if st.button("Generate"):
         else:
             translate_text, write_text, discuss_text, answer_key_text = generate_tasks(word_pairs)
 
-            st.subheader("Translate:")
+            st.subheader("Translate")
             st.text(translate_text)
 
-            st.subheader("Write:")
+            st.subheader("Write")
             st.text(write_text)
 
-            st.subheader("Discuss:")
+            st.subheader("Discuss")
             st.text(discuss_text)
 
-            st.subheader("🔑 Answer Key:")
+            st.subheader("🔑 Answer Key")
             st.text(answer_key_text)
