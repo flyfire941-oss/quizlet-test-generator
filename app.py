@@ -6,7 +6,10 @@ st.set_page_config(page_title="Vocabulary Worksheet Generator", layout="centered
 st.title("Vocabulary Worksheet Generator")
 
 # язык
-language = st.radio("Select language / Выберите язык:", ["English", "Русский"])
+language = st.radio(
+    "Select worksheet language / Выберите язык задания:",
+    ["English", "Русский"]
+)
 
 # тип задания
 worksheet_type = st.selectbox(
