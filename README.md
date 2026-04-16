@@ -1,101 +1,19 @@
-# 📘 Quiz Generator for Teachers
+Instructions for Teachers:
 
-A simple web application for teachers to generate quizzes from vocabulary lists.
+1. Enter one word or term per line, followed by its translation or definition.
+2. Separate the term and definition using a space, hyphen '-', or tab.
+3. The first item is always considered the "term" (the key word).
+4. The second item is the "definition" or translation.
+5. You can mix languages: English → Russian, Russian → English, or English → English (term + definition).
+6. Examples:
 
-The app helps create:
-- Translation exercises
-- Writing tasks
-- Two test variants (A & B)
-- Answer keys for teachers
+cat - кот
+apple яблоко
+photosynthesis Photosynthesis is the process by which plants make food
 
----
-
-## 🚀 Features
-
-- ✏️ Paste vocabulary directly (no CSV needed)
-- 🎯 Level-based tasks (A1–A2)
-- 🔄 Two test variants with equal difficulty
-- 📝 Writing task (use 3–5 words)
-- 🔑 Automatic answer key generation
-- 🚫 Ignores full sentences (only short words/phrases)
-
----
-
-## 🧠 How It Works
-
-1. Paste vocabulary in the format:
-apple - яблоко
-to run - бегать
-beautiful - красивый
-
-2. Choose the level (A1–A2)
-
-3. Click **Generate**
-
-4. Get:
-   - Test A
-   - Test B
-   - Writing task
-   - Answer key
-
----
-
-## 🌐 Live Demo
-
-If deployed via Render, your app will be available at:
-https://your-app-name.onrender.com
-
----
-
-## 🛠️ Tech Stack
-
-- Python
-- Streamlit
-- Pandas
-
----
-
-## ⚙️ Installation (for local run)
-
-1. Clone the repository:
-git clone https://github.com/your-username/quiz-generator.git
-
-2. Install dependencies:
-pip install -r requirements.txt
-
-3. Run the app:
-streamlit run app.py
-
----
-
-## 📁 Project Structure
-quiz-generator/
-│
-├── app.py # Main application
-├── generator.py # Test generation logic
-├── requirements.txt # Dependencies
-└── .streamlit/
-└── config.toml # Streamlit configuration
-
----
-
-## 🎯 Future Improvements
-
-- 📄 Export to Word (.docx)
-- 🗣️ Speaking tasks generation
-- 🧩 More advanced level filtering
-- 🎨 Improved UI
-- 📊 Progress tracking for students
-
----
-
-## ⚠️ Notes
-
-- The app does NOT rely on Quizlet parsing to ensure stability.
-- Designed for educational use and flexibility.
-
----
-
-## 👩‍🏫 Author
-
-Created as a learning project for educational use and teaching support.
+7. Press "Generate worksheet" to create:
+   - Translate section (up to 10 items)
+   - Write section (5 sentences)
+   - Discuss section (oral activity)
+   - Answer Key table (formatted for long definitions)
+8. Download the PDF for printing or sharing with students.
