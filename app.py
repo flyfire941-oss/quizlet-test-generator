@@ -5,55 +5,49 @@ st.set_page_config(page_title="Vocabulary Worksheet Generator", layout="centered
 
 st.title("Vocabulary Worksheet Generator")
 
-# 🔹 выбор языка
-language = st.radio("Select instruction language / Выберите язык:", ["English", "Русский"])
+# === язык ===
+language = st.radio("Select language / Выберите язык:", ["English", "Русский"])
+
+# === тип задания ===
+worksheet_type = st.selectbox(
+    "Select worksheet type / Тип задания:",
+    ["Full worksheet", "Writing only", "Speaking only"]
+)
 
 st.divider()
 
-# 🔹 тексты интерфейса
+# === тексты ===
 if language == "English":
     st.caption("Create printable classroom activities quickly and easily")
 
     instructions = (
-        "Add **one word pair per line**.\n"
-        "- The first item is the **term or word**.\n"
-        "- The second item is the **definition or translation**.\n"
-        "- Use a space, hyphen `-`, or tab to separate them.\n\n"
-        "**Examples:**\n"
+        "Enter one word pair per line.\n"
+        "First = term, second = translation or definition.\n"
+        "Use space, hyphen (-) or tab.\n\n"
+        "Example:\n"
         "cat - кот\n"
         "apple яблоко"
     )
 
     button_text = "Generate worksheet"
     warning_text = "Please enter some words first."
-    error_text = "No valid words found. Please check your input format."
-
-    section_translate = "Translate"
-    section_write = "Write"
-    section_discuss = "Discuss"
-    section_answers = "🔑 Answer Key"
+    error_text = "No valid words found."
 
 else:
     st.caption("Создавайте задания для уроков быстро и удобно")
 
     instructions = (
-        "Введите **по одной паре слов на строку**.\n"
-        "- Первое слово — это **термин или слово**.\n"
-        "- Второе — это **перевод или определение**.\n"
-        "- Используйте пробел, дефис `-` или TAB.\n\n"
-        "**Пример:**\n"
+        "Введите одну пару слов на строку.\n"
+        "Первое — слово/термин, второе — перевод или определение.\n"
+        "Используйте пробел, дефис или TAB.\n\n"
+        "Пример:\n"
         "cat - кот\n"
         "apple яблоко"
     )
 
-    button_text = "Сгенерировать задание"
+    button_text = "Сгенерировать"
     warning_text = "Введите слова."
-    error_text = "Не удалось распознать слова. Проверьте формат."
-
-    section_translate = "Переведите"
-    section_write = "Напишите"
-    section_discuss = "Обсудите"
-    section_answers = "🔑 Ответы"
+    error_text = "Ошибка формата."
 
 st.markdown("### Input")
 st.write(instructions)
@@ -75,19 +69,24 @@ if st.button(button_text):
 
             st.markdown("### Preview")
 
-            st.markdown(f"**{section_translate}**")
-            st.text(translate)
+            if worksheet_type == "Full worksheet":
+                st.text(translate)
+                st.text(write)
+                st.text(discuss)
 
-            st.markdown(f"**{section_write}**")
-            st.text(write)
+            elif worksheet_type == "Writing only":
+                st.text(write)
 
-            st.markdown(f"**{section_discuss}**")
-            st.text(discuss)
+            elif worksheet_type == "Speaking only":
+                st.text(discuss)
 
-            st.markdown(f"**{section_answers}**")
+            st.markdown("🔑")
             st.text(answers)
 
-            pdf_file = generate_pdf(translate, write, discuss, answers, language)
+            pdf_file = generate_pdf(
+                translate, write, discuss, answers,
+                language, worksheet_type
+            )
 
             with open(pdf_file, "rb") as f:
                 st.download_button(
