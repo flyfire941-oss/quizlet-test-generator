@@ -7,17 +7,13 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase import pdfmetrics
 import os
 
-# === ШРИФТЫ ===
 FONT_DIR = os.path.join(os.path.dirname(__file__), "fonts")
 
 pdfmetrics.registerFont(TTFont('Roboto', os.path.join(FONT_DIR, 'Roboto-Regular.ttf')))
 pdfmetrics.registerFont(TTFont('Roboto-Bold', os.path.join(FONT_DIR, 'Roboto-Bold.ttf')))
 
-
-# === ПАРСИНГ СЛОВ ===
 def parse_words(input_text):
     word_pairs = []
-
     for line in input_text.strip().split("\n"):
         if not line.strip():
             continue
@@ -36,8 +32,6 @@ def parse_words(input_text):
 
     return word_pairs
 
-
-# === ГЕНЕРАЦИЯ ЗАДАНИЙ ===
 def generate_tasks(word_pairs, language):
     terms = [pair[0] for pair in word_pairs][:10]
     definitions = [pair[1] for pair in word_pairs][:10]
@@ -55,46 +49,16 @@ def generate_tasks(word_pairs, language):
 
     return translate_text, write_text, discuss_text, answer_key_text
 
-
-# === ГЕНЕРАЦИЯ PDF ===
 def generate_pdf(translate, write, discuss, answers, language, worksheet_type, filename="worksheet.pdf"):
 
-    doc = SimpleDocTemplate(
-        filename,
-        pagesize=A4,
-        rightMargin=20 * mm,
-        leftMargin=20 * mm,
-        topMargin=20 * mm,
-        bottomMargin=20 * mm
-    )
+    doc = SimpleDocTemplate(filename, pagesize=A4,
+                            rightMargin=20*mm, leftMargin=20*mm,
+                            topMargin=20*mm, bottomMargin=20*mm)
 
-    # === СТИЛИ ===
-    title_style = ParagraphStyle(
-        name='Title',
-        fontName='Roboto-Bold',
-        fontSize=22,
-        leading=26,
-        spaceAfter=10
-    )
+    title_style = ParagraphStyle(name='Title', fontName='Roboto-Bold', fontSize=22)
+    section_style = ParagraphStyle(name='Section', fontName='Roboto-Bold', fontSize=14)
+    normal_style = ParagraphStyle(name='Normal', fontName='Roboto', fontSize=12)
 
-    section_style = ParagraphStyle(
-        name='Section',
-        fontName='Roboto-Bold',
-        fontSize=14,
-        leading=18,
-        spaceAfter=6,
-        spaceBefore=12
-    )
-
-    normal_style = ParagraphStyle(
-        name='Normal',
-        fontName='Roboto',
-        fontSize=12,
-        leading=16,
-        spaceAfter=6
-    )
-
-    # === ЯЗЫК ===
     if language == "English":
         title = "Vocabulary Worksheet"
         t_title = "1. Translate"
@@ -112,68 +76,47 @@ def generate_pdf(translate, write, discuss, answers, language, worksheet_type, f
 
     content = []
 
-    # === HEADER ===
     content.append(Paragraph(title, title_style))
-    content.append(Spacer(1, 6))
+    content.append(Spacer(1, 10))
     content.append(Paragraph(name_line, normal_style))
-    content.append(Spacer(1, 12))
+    content.append(Spacer(1, 15))
 
-    # === FULL WORKSHEET ===
     if worksheet_type == "Full worksheet":
-
-        # Translate
         content.append(Paragraph(t_title, section_style))
         for i, w in enumerate(translate.split("\n")):
             content.append(Paragraph(f"{i+1}. {w}", normal_style))
-            content.append(Spacer(1, 4))
 
-        content.append(Spacer(1, 10))
-
-        # Write
         content.append(Paragraph(w_title, section_style))
         content.append(Paragraph(write.replace("\n", "<br/>"), normal_style))
 
         for i in range(5):
-            content.append(Paragraph(f"{i+1}. _______________________________", normal_style))
+            content.append(Paragraph(f"{i+1}. ____________________", normal_style))
 
-        content.append(Spacer(1, 10))
-
-        # Discuss (устное)
         content.append(Paragraph(d_title, section_style))
         content.append(Paragraph(discuss.replace("\n", "<br/>"), normal_style))
 
-    # === WRITING ONLY ===
     elif worksheet_type == "Writing only":
-
         content.append(Paragraph(w_title, section_style))
         content.append(Paragraph(write.replace("\n", "<br/>"), normal_style))
 
         for i in range(5):
-            content.append(Paragraph(f"{i+1}. _______________________________", normal_style))
+            content.append(Paragraph(f"{i+1}. ____________________", normal_style))
 
-    # === SPEAKING ONLY ===
     elif worksheet_type == "Speaking only":
-
         content.append(Paragraph(d_title, section_style))
         content.append(Paragraph(discuss.replace("\n", "<br/>"), normal_style))
 
-    # === ANSWER KEY ===
     content.append(PageBreak())
+
     content.append(Paragraph(a_title, section_style))
 
-    answer_table_data = [
-        [a.split(" - ")[0], a.split(" - ")[1]]
-        for a in answers.split("\n")
-    ]
+    answer_table_data = [[a.split(" - ")[0], a.split(" - ")[1]] for a in answers.split("\n")]
 
-    table = Table(answer_table_data, colWidths=[80 * mm, None])
-
+    table = Table(answer_table_data, colWidths=[80*mm, None])
     table.setStyle(TableStyle([
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('FONTNAME', (0, 0), (-1, -1), 'Roboto'),
-        ('WORDWRAP', (0, 0), (-1, -1), 'CJK')
+        ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
+        ('FONTNAME', (0,0), (-1,-1), 'Roboto'),
+        ('VALIGN', (0,0), (-1,-1), 'TOP')
     ]))
 
     content.append(table)
