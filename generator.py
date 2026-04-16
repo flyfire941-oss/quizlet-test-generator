@@ -57,7 +57,7 @@ def generate_tasks(word_pairs, language):
 
 
 # === ГЕНЕРАЦИЯ PDF ===
-def generate_pdf(translate, write, discuss, answers, language, filename="worksheet.pdf"):
+def generate_pdf(translate, write, discuss, answers, language, worksheet_type, filename="worksheet.pdf"):
 
     doc = SimpleDocTemplate(
         filename,
@@ -97,17 +97,17 @@ def generate_pdf(translate, write, discuss, answers, language, filename="workshe
     # === ЯЗЫК ===
     if language == "English":
         title = "Vocabulary Worksheet"
-        translate_title = "1. Translate"
-        write_title = "2. Write"
-        discuss_title = "3. Discuss"
-        answer_title = "Answer Key"
+        t_title = "1. Translate"
+        w_title = "2. Write"
+        d_title = "3. Discuss"
+        a_title = "Answer Key"
         name_line = "Name: ________________________    Date: ____________"
     else:
         title = "Лексическое задание"
-        translate_title = "1. Переведите"
-        write_title = "2. Напишите"
-        discuss_title = "3. Обсудите"
-        answer_title = "Ответы"
+        t_title = "1. Переведите"
+        w_title = "2. Напишите"
+        d_title = "3. Обсудите"
+        a_title = "Ответы"
         name_line = "Имя: ________________________    Дата: ____________"
 
     content = []
@@ -118,32 +118,48 @@ def generate_pdf(translate, write, discuss, answers, language, filename="workshe
     content.append(Paragraph(name_line, normal_style))
     content.append(Spacer(1, 12))
 
-    # === 1. TRANSLATE ===
-    content.append(Paragraph(translate_title, section_style))
+    # === FULL WORKSHEET ===
+    if worksheet_type == "Full worksheet":
 
-    for i, w in enumerate(translate.split("\n")):
-        content.append(Paragraph(f"{i+1}. {w}", normal_style))
-        content.append(Spacer(1, 4))
+        # Translate
+        content.append(Paragraph(t_title, section_style))
+        for i, w in enumerate(translate.split("\n")):
+            content.append(Paragraph(f"{i+1}. {w}", normal_style))
+            content.append(Spacer(1, 4))
 
-    content.append(Spacer(1, 10))
+        content.append(Spacer(1, 10))
 
-    # === 2. WRITE ===
-    content.append(Paragraph(write_title, section_style))
-    content.append(Paragraph(write.replace("\n", "<br/>"), normal_style))
+        # Write
+        content.append(Paragraph(w_title, section_style))
+        content.append(Paragraph(write.replace("\n", "<br/>"), normal_style))
 
-    for i in range(5):
-        content.append(Paragraph(f"{i+1}. _______________________________", normal_style))
+        for i in range(5):
+            content.append(Paragraph(f"{i+1}. _______________________________", normal_style))
 
-    content.append(Spacer(1, 10))
+        content.append(Spacer(1, 10))
 
-    # === 3. DISCUSS (без линий) ===
-    content.append(Paragraph(discuss_title, section_style))
-    content.append(Paragraph(discuss.replace("\n", "<br/>"), normal_style))
+        # Discuss (устное)
+        content.append(Paragraph(d_title, section_style))
+        content.append(Paragraph(discuss.replace("\n", "<br/>"), normal_style))
 
-    content.append(PageBreak())
+    # === WRITING ONLY ===
+    elif worksheet_type == "Writing only":
+
+        content.append(Paragraph(w_title, section_style))
+        content.append(Paragraph(write.replace("\n", "<br/>"), normal_style))
+
+        for i in range(5):
+            content.append(Paragraph(f"{i+1}. _______________________________", normal_style))
+
+    # === SPEAKING ONLY ===
+    elif worksheet_type == "Speaking only":
+
+        content.append(Paragraph(d_title, section_style))
+        content.append(Paragraph(discuss.replace("\n", "<br/>"), normal_style))
 
     # === ANSWER KEY ===
-    content.append(Paragraph(answer_title, section_style))
+    content.append(PageBreak())
+    content.append(Paragraph(a_title, section_style))
 
     answer_table_data = [
         [a.split(" - ")[0], a.split(" - ")[1]]
