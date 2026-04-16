@@ -37,7 +37,7 @@ def parse_words(input_text):
     return word_pairs
 
 
-# === ЗАДАНИЯ ===
+# === ГЕНЕРАЦИЯ ЗАДАНИЙ ===
 def generate_tasks(word_pairs, language):
     terms = [pair[0] for pair in word_pairs][:10]
     definitions = [pair[1] for pair in word_pairs][:10]
@@ -68,30 +68,33 @@ def generate_pdf(translate, write, discuss, answers, language, worksheet_type, f
         bottomMargin=20 * mm
     )
 
-    # Стили
+    # === СТИЛИ (исправленные) ===
     title_style = ParagraphStyle(
         name='Title',
         fontName='Roboto-Bold',
         fontSize=22,
-        spaceAfter=12
+        leading=26,
+        spaceAfter=16
     )
 
     section_style = ParagraphStyle(
         name='Section',
         fontName='Roboto-Bold',
         fontSize=14,
-        spaceBefore=12,
-        spaceAfter=6
+        leading=18,
+        spaceBefore=14,
+        spaceAfter=8
     )
 
     normal_style = ParagraphStyle(
         name='Normal',
         fontName='Roboto',
         fontSize=12,
-        spaceAfter=4
+        leading=16,
+        spaceAfter=6
     )
 
-    # Язык
+    # === ЯЗЫК ===
     if language == "English":
         title = "Vocabulary Worksheet"
         t_title = "1. Translate"
@@ -109,39 +112,48 @@ def generate_pdf(translate, write, discuss, answers, language, worksheet_type, f
 
     content = []
 
-    # Header
+    # === HEADER ===
     content.append(Paragraph(title, title_style))
     content.append(Paragraph(name_line, normal_style))
-    content.append(Spacer(1, 10))
+    content.append(Spacer(1, 12))
 
-    # === FULL ===
+    # === FULL WORKSHEET ===
     if worksheet_type == "Full worksheet":
 
-        # Translate
         content.append(Paragraph(t_title, section_style))
+        content.append(Spacer(1, 6))
+
         for i, w in enumerate(translate.split("\n")):
             content.append(Paragraph(f"{i+1}. {w}", normal_style))
 
-        # Write
+        content.append(Spacer(1, 12))
+
         content.append(Paragraph(w_title, section_style))
         content.append(Paragraph(write.replace("\n", "<br/>"), normal_style))
+        content.append(Spacer(1, 8))
 
         for i in range(5):
             content.append(Paragraph(f"{i+1}. _______________________________", normal_style))
 
-        # Discuss
+        content.append(Spacer(1, 12))
+
         content.append(Paragraph(d_title, section_style))
         content.append(Paragraph(discuss.replace("\n", "<br/>"), normal_style))
 
-    # === WRITING ONLY (теперь включает Translate) ===
+    # === WRITING ONLY ===
     elif worksheet_type == "Writing only":
 
         content.append(Paragraph(t_title, section_style))
+        content.append(Spacer(1, 6))
+
         for i, w in enumerate(translate.split("\n")):
             content.append(Paragraph(f"{i+1}. {w}", normal_style))
 
+        content.append(Spacer(1, 12))
+
         content.append(Paragraph(w_title, section_style))
         content.append(Paragraph(write.replace("\n", "<br/>"), normal_style))
+        content.append(Spacer(1, 8))
 
         for i in range(5):
             content.append(Paragraph(f"{i+1}. _______________________________", normal_style))
@@ -150,11 +162,13 @@ def generate_pdf(translate, write, discuss, answers, language, worksheet_type, f
     elif worksheet_type == "Speaking only":
 
         content.append(Paragraph(d_title, section_style))
+        content.append(Spacer(1, 6))
         content.append(Paragraph(discuss.replace("\n", "<br/>"), normal_style))
 
-    # === ANSWERS ===
+    # === ANSWER KEY ===
     content.append(PageBreak())
     content.append(Paragraph(a_title, section_style))
+    content.append(Spacer(1, 8))
 
     answer_table_data = [
         [a.split(" - ")[0], a.split(" - ")[1]]
@@ -166,7 +180,9 @@ def generate_pdf(translate, write, discuss, answers, language, worksheet_type, f
     table.setStyle(TableStyle([
         ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('FONTNAME', (0, 0), (-1, -1), 'Roboto')
+        ('FONTNAME', (0, 0), (-1, -1), 'Roboto'),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
     ]))
 
     content.append(table)
