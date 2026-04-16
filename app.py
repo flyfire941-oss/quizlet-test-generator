@@ -1,163 +1,139 @@
 import streamlit as st
 from generator import parse_words, generate_tasks, generate_pdf
 
-st.set_page_config(page_title="Worksheet Generator", layout="wide")
+st.set_page_config(page_title="Vocabulary Worksheet Generator", layout="centered")
 
-# === СТИЛИ (делают "как Notion") ===
-st.markdown("""
-<style>
-.main {
-    background-color: #fafafa;
-}
+st.title("Vocabulary Worksheet Generator")
 
-.block {
-    background-color: white;
-    padding: 20px;
-    border-radius: 14px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    margin-bottom: 15px;
-}
+# === ВЫБОР ЯЗЫКА ===
+language = st.radio(
+    "Select worksheet language / Выберите язык задания:",
+    ["English", "Русский"]
+)
 
-.title {
-    font-size: 28px;
-    font-weight: 600;
-    margin-bottom: 10px;
-}
-
-.subtitle {
-    font-size: 14px;
-    color: #666;
-    margin-bottom: 20px;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# === HEADER ===
-st.markdown('<div class="title">Vocabulary Worksheet Generator</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">Create clean, printable classroom worksheets in seconds</div>', unsafe_allow_html=True)
-
-# === НАСТРОЙКИ ===
-col_settings1, col_settings2 = st.columns(2)
-
-with col_settings1:
-    language = st.selectbox(
-        "Worksheet language / Язык задания",
-        ["English", "Русский"]
-    )
-
-with col_settings2:
-    worksheet_type = st.selectbox(
-        "Worksheet type / Тип задания",
-        ["Full worksheet", "Writing only", "Speaking only"]
-    )
+# === ВЫБОР ТИПА ЗАДАНИЯ ===
+worksheet_type = st.selectbox(
+    "Select worksheet type / Тип задания:",
+    ["Full worksheet", "Writing only", "Speaking only"]
+)
 
 st.divider()
 
-# === ИНСТРУКЦИЯ ===
+# === ТЕКСТЫ ===
 if language == "English":
+    st.caption("Create printable classroom activities quickly and easily")
+
     instructions = (
         "Enter one word pair per line.\n"
-        "First = term, second = translation or definition.\n"
+        "The first word is the term.\n"
+        "The second is the translation or definition.\n"
         "Use space, hyphen (-) or tab.\n\n"
         "Example:\n"
         "cat - кот\n"
         "apple яблоко"
     )
+
     button_text = "Generate worksheet"
+    warning_text = "Please enter some words first."
+    error_text = "No valid words found."
+
     translate_label = "Translate"
     write_label = "Write"
     discuss_label = "Discuss"
     answer_label = "🔑 Answer Key"
+
 else:
+    st.caption("Создавайте задания для уроков быстро и удобно")
+
     instructions = (
         "Введите одну пару слов на строку.\n"
-        "Первое — термин.\n"
-        "Второе — перевод или определение.\n\n"
+        "Первое — слово или термин.\n"
+        "Второе — перевод или определение.\n"
+        "Используйте пробел, дефис или TAB.\n\n"
         "Пример:\n"
         "cat - кот\n"
         "apple яблоко"
     )
+
     button_text = "Сгенерировать"
+    warning_text = "Введите слова."
+    error_text = "Ошибка формата."
+
     translate_label = "Переведите"
     write_label = "Напишите"
     discuss_label = "Обсудите"
     answer_label = "🔑 Ответы"
 
-# === ДВЕ КОЛОНКИ ===
-col1, col2 = st.columns([1, 1])
+# === INPUT ===
+st.markdown("### Input")
+st.write(instructions)
 
-# === ЛЕВАЯ КОЛОНКА (INPUT) ===
-with col1:
-    st.markdown('<div class="block">', unsafe_allow_html=True)
+words_input = st.text_area("")
 
-    st.subheader("Input")
-    st.write(instructions)
+st.divider()
 
-    words_input = st.text_area("", height=300)
+# === ГЕНЕРАЦИЯ ===
+if st.button(button_text):
 
-    generate = st.button(button_text)
+    if not words_input.strip():
+        st.warning(warning_text)
 
-    st.markdown('</div>', unsafe_allow_html=True)
+    else:
+        word_pairs = parse_words(words_input)
 
-# === ПРАВАЯ КОЛОНКА (PREVIEW) ===
-with col2:
-    st.markdown('<div class="block">', unsafe_allow_html=True)
+        if not word_pairs:
+            st.error(error_text)
 
-    st.subheader("Preview")
-
-    if generate:
-
-        if not words_input.strip():
-            st.warning("Please enter words")
         else:
-            word_pairs = parse_words(words_input)
+            translate, write, discuss, answers = generate_tasks(word_pairs, language)
 
-            if not word_pairs:
-                st.error("Format error")
-            else:
-                translate, write, discuss, answers = generate_tasks(word_pairs, language)
+            st.markdown("### Preview")
 
-                # FULL
-                if worksheet_type == "Full worksheet":
-                    st.markdown(f"**{translate_label}**")
-                    st.text(translate)
+            # === FULL ===
+            if worksheet_type == "Full worksheet":
 
-                    st.markdown(f"**{write_label}**")
-                    st.text(write)
+                st.markdown(f"**{translate_label}**")
+                st.text(translate)
 
-                    st.markdown(f"**{discuss_label}**")
-                    st.text(discuss)
+                st.markdown(f"**{write_label}**")
+                st.text(write)
 
-                # WRITING
-                elif worksheet_type == "Writing only":
-                    st.markdown(f"**{translate_label}**")
-                    st.text(translate)
+                st.markdown(f"**{discuss_label}**")
+                st.text(discuss)
 
-                    st.markdown(f"**{write_label}**")
-                    st.text(write)
+            # === WRITING ONLY ===
+            elif worksheet_type == "Writing only":
 
-                # SPEAKING
-                elif worksheet_type == "Speaking only":
-                    st.markdown(f"**{discuss_label}**")
-                    st.text(discuss)
+                st.markdown(f"**{translate_label}**")
+                st.text(translate)
 
-                st.markdown(f"**{answer_label}**")
-                st.text(answers)
+                st.markdown(f"**{write_label}**")
+                st.text(write)
 
-                pdf_file = generate_pdf(
-                    translate,
-                    write,
-                    discuss,
-                    answers,
-                    language,
-                    worksheet_type
+            # === SPEAKING ONLY ===
+            elif worksheet_type == "Speaking only":
+
+                st.markdown(f"**{discuss_label}**")
+                st.text(discuss)
+
+            # === ANSWERS ===
+            st.markdown(f"**{answer_label}**")
+            st.text(answers)
+
+            # === PDF ===
+            pdf_file = generate_pdf(
+                translate,
+                write,
+                discuss,
+                answers,
+                language,
+                worksheet_type
+            )
+
+            with open(pdf_file, "rb") as f:
+                st.download_button(
+                    label="Download PDF",
+                    data=f,
+                    file_name="worksheet.pdf",
+                    mime="application/pdf"
                 )
-
-                with open(pdf_file, "rb") as f:
-                    st.download_button(
-                        "Download PDF",
-                        f,
-                        file_name="worksheet.pdf"
-                    )
-
-    st.markdown('</div>', unsafe_allow_html=True)
