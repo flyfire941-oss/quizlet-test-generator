@@ -5,10 +5,10 @@ st.set_page_config(page_title="Vocabulary Worksheet Generator", layout="centered
 
 st.title("Vocabulary Worksheet Generator")
 
-# === язык ===
+# язык
 language = st.radio("Select language / Выберите язык:", ["English", "Русский"])
 
-# === тип задания ===
+# тип задания
 worksheet_type = st.selectbox(
     "Select worksheet type / Тип задания:",
     ["Full worksheet", "Writing only", "Speaking only"]
@@ -16,7 +16,7 @@ worksheet_type = st.selectbox(
 
 st.divider()
 
-# === тексты ===
+# тексты
 if language == "English":
     st.caption("Create printable classroom activities quickly and easily")
 
