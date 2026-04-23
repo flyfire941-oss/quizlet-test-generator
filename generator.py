@@ -172,7 +172,10 @@ for a in answers.split("\n"):
             Paragraph(left, normal_style),
             Paragraph(right, normal_style)
         ])
-    table = Table(answer_table_data, colWidths=[80 * mm, None])
+   table = Table(
+    answer_table_data,
+    colWidths=[60 * mm, 110 * mm]
+)
 
     table.setStyle(TableStyle([
         ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
