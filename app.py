@@ -1,4 +1,6 @@
 import streamlit as st
+import streamlit.components.v1 as components
+
 from generator import parse_words, generate_tasks, generate_pdf
 
 st.set_page_config(
@@ -35,6 +37,8 @@ if language == "English":
         "apple яблоко"
     )
 
+    tab_hint = "Press TAB to insert indentation inside the field"
+
     button_text = "Generate worksheet"
     warning_text = "Please enter some words first."
     format_error = "No valid words found."
@@ -62,6 +66,8 @@ else:
         "cat - кот\n"
         "apple яблоко"
     )
+
+    tab_hint = "Нажмите TAB для вставки отступа внутри поля"
 
     button_text = "Сгенерировать"
     warning_text = "Введите слова."
@@ -97,7 +103,45 @@ st.divider()
 st.markdown("### Input")
 st.write(instructions)
 
-words_input = st.text_area("", height=280)
+words_input = st.text_area(
+    "",
+    height=280,
+    key="words_input"
+)
+
+st.caption(tab_hint)
+
+# === TAB SUPPORT ===
+components.html(
+    """
+    <script>
+    const textarea = window.parent.document.querySelector('textarea');
+
+    if (textarea && !textarea.dataset.tabEnabled) {
+        textarea.dataset.tabEnabled = "true";
+
+        textarea.addEventListener('keydown', function(e) {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+
+                this.value =
+                    this.value.substring(0, start) +
+                    "\\t" +
+                    this.value.substring(end);
+
+                this.selectionStart = this.selectionEnd = start + 1;
+
+                this.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        });
+    }
+    </script>
+    """,
+    height=0,
+)
 
 st.divider()
 
