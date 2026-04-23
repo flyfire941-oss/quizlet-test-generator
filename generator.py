@@ -8,14 +8,12 @@ from reportlab.pdfbase import pdfmetrics
 import os
 import random
 
-# === ШРИФТЫ ===
 FONT_DIR = os.path.join(os.path.dirname(__file__), "fonts")
 
-pdfmetrics.registerFont(TTFont('Roboto', os.path.join(FONT_DIR, 'Roboto-Regular.ttf')))
-pdfmetrics.registerFont(TTFont('Roboto-Bold', os.path.join(FONT_DIR, 'Roboto-Bold.ttf')))
+pdfmetrics.registerFont(TTFont("Roboto", os.path.join(FONT_DIR, "Roboto-Regular.ttf")))
+pdfmetrics.registerFont(TTFont("Roboto-Bold", os.path.join(FONT_DIR, "Roboto-Bold.ttf")))
 
 
-# === ПАРСИНГ ===
 def parse_words(input_text):
     word_pairs = []
 
@@ -38,24 +36,18 @@ def parse_words(input_text):
     return word_pairs
 
 
-# === ГЕНЕРАЦИЯ ЗАДАНИЙ (С РАНДОМОМ) ===
 def generate_tasks(word_pairs, language):
-
-    # Берём до 10 слов для перевода
     selected_pairs = word_pairs[:10]
 
     terms = [pair[0] for pair in selected_pairs]
     definitions = [pair[1] for pair in selected_pairs]
 
-    # === TRANSLATE (без изменений) ===
     translate_text = "\n".join(definitions)
 
-    # === WRITE (рандомные слова) ===
     sample_size = min(5, len(terms))
     random_terms = random.sample(terms, sample_size)
     random.shuffle(random_terms)
 
-    # === DISCUSS (тоже перемешаем для разнообразия) ===
     discuss_terms = terms.copy()
     random.shuffle(discuss_terms)
 
@@ -64,16 +56,14 @@ def generate_tasks(word_pairs, language):
         discuss_text = "Discuss with a partner. Use the words below to make your own examples:\n\n" + ", ".join(discuss_terms)
     else:
         write_text = "Напишите 5 предложений, используя слова ниже:\n\n" + ", ".join(random_terms)
-        discuss_text = "Обсудите с партнером, используя слова ниже:\n\n" + ", ".join(discuss_terms)
+        discuss_text = "Обсудите с партнером. Используйте слова ниже:\n\n" + ", ".join(discuss_terms)
 
-    # === ANSWER KEY ===
     answer_key_text = "\n".join([f"{t} - {d}" for t, d in word_pairs])
 
     return translate_text, write_text, discuss_text, answer_key_text
 
 
-# === PDF (оставляем как у тебя уже хороший вариант) ===
-def generate_pdf(translate, write, discuss, answers, language, worksheet_type, filename="worksheet.pdf"):
+def generate_pdf(translate, write, discuss, answers, language, selected_sections, filename="worksheet.pdf"):
 
     doc = SimpleDocTemplate(
         filename,
@@ -85,16 +75,16 @@ def generate_pdf(translate, write, discuss, answers, language, worksheet_type, f
     )
 
     title_style = ParagraphStyle(
-        name='Title',
-        fontName='Roboto-Bold',
+        name="Title",
+        fontName="Roboto-Bold",
         fontSize=22,
         leading=26,
         spaceAfter=16
     )
 
     section_style = ParagraphStyle(
-        name='Section',
-        fontName='Roboto-Bold',
+        name="Section",
+        fontName="Roboto-Bold",
         fontSize=14,
         leading=18,
         spaceBefore=14,
@@ -102,8 +92,8 @@ def generate_pdf(translate, write, discuss, answers, language, worksheet_type, f
     )
 
     normal_style = ParagraphStyle(
-        name='Normal',
-        fontName='Roboto',
+        name="Normal",
+        fontName="Roboto",
         fontSize=12,
         leading=16,
         spaceAfter=6
@@ -130,49 +120,27 @@ def generate_pdf(translate, write, discuss, answers, language, worksheet_type, f
     content.append(Paragraph(name_line, normal_style))
     content.append(Spacer(1, 12))
 
-    if worksheet_type == "Full worksheet":
-
+    if "Translation" in selected_sections:
         content.append(Paragraph(t_title, section_style))
-        content.append(Spacer(1, 6))
+        for i, item in enumerate(translate.split("\n")):
+            content.append(Paragraph(f"{i+1}. {item}", normal_style))
+        content.append(Spacer(1, 10))
 
-        for i, w in enumerate(translate.split("\n")):
-            content.append(Paragraph(f"{i+1}. {w}", normal_style))
-
-        content.append(Spacer(1, 12))
-
+    if "Writing" in selected_sections:
         content.append(Paragraph(w_title, section_style))
         content.append(Paragraph(write.replace("\n", "<br/>"), normal_style))
 
         for i in range(5):
             content.append(Paragraph(f"{i+1}. _______________________________", normal_style))
 
-        content.append(Spacer(1, 12))
+        content.append(Spacer(1, 10))
 
-        content.append(Paragraph(d_title, section_style))
-        content.append(Paragraph(discuss.replace("\n", "<br/>"), normal_style))
-
-    elif worksheet_type == "Writing only":
-
-        content.append(Paragraph(t_title, section_style))
-        content.append(Spacer(1, 6))
-
-        for i, w in enumerate(translate.split("\n")):
-            content.append(Paragraph(f"{i+1}. {w}", normal_style))
-
-        content.append(Spacer(1, 12))
-
-        content.append(Paragraph(w_title, section_style))
-        content.append(Paragraph(write.replace("\n", "<br/>"), normal_style))
-
-        for i in range(5):
-            content.append(Paragraph(f"{i+1}. _______________________________", normal_style))
-
-    elif worksheet_type == "Speaking only":
-
+    if "Speaking" in selected_sections:
         content.append(Paragraph(d_title, section_style))
         content.append(Paragraph(discuss.replace("\n", "<br/>"), normal_style))
 
     content.append(PageBreak())
+
     content.append(Paragraph(a_title, section_style))
     content.append(Spacer(1, 8))
 
@@ -184,9 +152,11 @@ def generate_pdf(translate, write, discuss, answers, language, worksheet_type, f
     table = Table(answer_table_data, colWidths=[80 * mm, None])
 
     table.setStyle(TableStyle([
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-        ('FONTNAME', (0, 0), (-1, -1), 'Roboto'),
-        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+        ("FONTNAME", (0, 0), (-1, -1), "Roboto"),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+        ("TOPPADDING", (0, 0), (-1, -1), 6),
     ]))
 
     content.append(table)
