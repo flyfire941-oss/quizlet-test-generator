@@ -1,3 +1,5 @@
+# generator.py
+
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, Table, TableStyle
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.pagesizes import A4
@@ -21,17 +23,33 @@ def parse_words(input_text):
         if not line.strip():
             continue
 
+        # 1. TAB — лучший и самый безопасный вариант
         if "\t" in line:
-            parts = line.split("\t")
+            parts = line.split("\t", 1)
+
+        # 2. дефис с пробелами
+        elif " - " in line:
+            parts = line.split(" - ", 1)
+
+        # 3. обычный дефис
         elif "-" in line:
             parts = line.split("-", 1)
+
+        # 4. пробел — только если ровно 2 элемента
         else:
-            parts = line.split(maxsplit=1)
+            split_parts = line.split()
+
+            if len(split_parts) == 2:
+                parts = split_parts
+            else:
+                continue
 
         if len(parts) == 2:
             term = parts[0].strip()
             definition = parts[1].strip()
-            word_pairs.append((term, definition))
+
+            if term and definition:
+                word_pairs.append((term, definition))
 
     return word_pairs
 
