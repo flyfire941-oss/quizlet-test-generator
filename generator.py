@@ -1,19 +1,39 @@
 # generator.py
 
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, Table, TableStyle
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Paragraph,
+    Spacer,
+    PageBreak,
+    Table,
+    TableStyle
+)
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.lib.units import mm
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase import pdfmetrics
+
 import os
 import random
 
+
 FONT_DIR = os.path.join(os.path.dirname(__file__), "fonts")
 
-pdfmetrics.registerFont(TTFont("Roboto", os.path.join(FONT_DIR, "Roboto-Regular.ttf")))
-pdfmetrics.registerFont(TTFont("Roboto-Bold", os.path.join(FONT_DIR, "Roboto-Bold.ttf")))
+pdfmetrics.registerFont(
+    TTFont(
+        "Roboto",
+        os.path.join(FONT_DIR, "Roboto-Regular.ttf")
+    )
+)
+
+pdfmetrics.registerFont(
+    TTFont(
+        "Roboto-Bold",
+        os.path.join(FONT_DIR, "Roboto-Bold.ttf")
+    )
+)
 
 
 def parse_words(input_text):
@@ -60,29 +80,63 @@ def generate_tasks(word_pairs, language):
     terms = [pair[0] for pair in selected_pairs]
     definitions = [pair[1] for pair in selected_pairs]
 
+    # Translation section
     translate_text = "\n".join(definitions)
 
+    # Writing section (randomized)
     sample_size = min(5, len(terms))
     random_terms = random.sample(terms, sample_size)
     random.shuffle(random_terms)
 
+    # Speaking section (randomized)
     discuss_terms = terms.copy()
     random.shuffle(discuss_terms)
 
     if language == "English":
-        write_text = "Write 5 sentences using the words below:\n\n" + ", ".join(random_terms)
-        discuss_text = "Discuss with a partner. Use the words below to make your own examples:\n\n" + ", ".join(discuss_terms)
+        write_text = (
+            "Write 5 sentences using the words below:\n\n"
+            + ", ".join(random_terms)
+        )
+
+        discuss_text = (
+            "Discuss with a partner. Use the words below "
+            "to make your own examples:\n\n"
+            + ", ".join(discuss_terms)
+        )
+
     else:
-        write_text = "Напишите 5 предложений, используя слова ниже:\n\n" + ", ".join(random_terms)
-        discuss_text = "Обсудите с партнером. Используйте слова ниже:\n\n" + ", ".join(discuss_terms)
+        write_text = (
+            "Напишите 5 предложений, используя слова ниже:\n\n"
+            + ", ".join(random_terms)
+        )
 
-    answer_key_text = "\n".join([f"{t} - {d}" for t, d in word_pairs])
+        discuss_text = (
+            "Обсудите с партнером. Используйте слова ниже:\n\n"
+            + ", ".join(discuss_terms)
+        )
 
-    return translate_text, write_text, discuss_text, answer_key_text
+    # Answer key
+    answer_key_text = "\n".join(
+        [f"{t} - {d}" for t, d in word_pairs]
+    )
+
+    return (
+        translate_text,
+        write_text,
+        discuss_text,
+        answer_key_text
+    )
 
 
-def generate_pdf(translate, write, discuss, answers, language, selected_sections, filename="worksheet.pdf"):
-
+def generate_pdf(
+    translate,
+    write,
+    discuss,
+    answers,
+    language,
+    selected_sections,
+    filename="worksheet.pdf"
+):
     doc = SimpleDocTemplate(
         filename,
         pagesize=A4,
@@ -123,59 +177,98 @@ def generate_pdf(translate, write, discuss, answers, language, selected_sections
         w_title = "2. Write"
         d_title = "3. Discuss"
         a_title = "Answer Key"
-        name_line = "Name: ________________________    Date: ____________"
+        name_line = (
+            "Name: ________________________    "
+            "Date: ____________"
+        )
+
     else:
         title = "Лексическое задание"
         t_title = "1. Переведите"
         w_title = "2. Напишите"
         d_title = "3. Обсудите"
         a_title = "Ответы"
-        name_line = "Имя: ________________________    Дата: ____________"
+        name_line = (
+            "Имя: ________________________    "
+            "Дата: ____________"
+        )
 
     content = []
 
+    # Title
     content.append(Paragraph(title, title_style))
     content.append(Paragraph(name_line, normal_style))
     content.append(Spacer(1, 12))
 
+    # Translation
     if "Translation" in selected_sections:
         content.append(Paragraph(t_title, section_style))
+
         for i, item in enumerate(translate.split("\n")):
-            content.append(Paragraph(f"{i+1}. {item}", normal_style))
+            content.append(
+                Paragraph(
+                    f"{i + 1}. {item}",
+                    normal_style
+                )
+            )
+
         content.append(Spacer(1, 10))
 
+    # Writing
     if "Writing" in selected_sections:
         content.append(Paragraph(w_title, section_style))
-        content.append(Paragraph(write.replace("\n", "<br/>"), normal_style))
+
+        content.append(
+            Paragraph(
+                write.replace("\n", "<br/>"),
+                normal_style
+            )
+        )
 
         for i in range(5):
-            content.append(Paragraph(f"{i+1}. _______________________________", normal_style))
+            content.append(
+                Paragraph(
+                    f"{i + 1}. _______________________________",
+                    normal_style
+                )
+            )
 
         content.append(Spacer(1, 10))
 
+    # Speaking
     if "Speaking" in selected_sections:
         content.append(Paragraph(d_title, section_style))
-        content.append(Paragraph(discuss.replace("\n", "<br/>"), normal_style))
 
+        content.append(
+            Paragraph(
+                discuss.replace("\n", "<br/>"),
+                normal_style
+            )
+        )
+
+    # Page break before answers
     content.append(PageBreak())
 
+    # Answer key title
     content.append(Paragraph(a_title, section_style))
     content.append(Spacer(1, 8))
 
+    # Answer table with automatic wrapping
     answer_table_data = []
 
-for a in answers.split("\n"):
-    if " - " in a:
-        left, right = a.split(" - ", 1)
+    for line in answers.split("\n"):
+        if " - " in line:
+            left, right = line.split(" - ", 1)
 
-        answer_table_data.append([
-            Paragraph(left, normal_style),
-            Paragraph(right, normal_style)
-        ])
-   table = Table(
-    answer_table_data,
-    colWidths=[60 * mm, 110 * mm]
-)
+            answer_table_data.append([
+                Paragraph(left, normal_style),
+                Paragraph(right, normal_style)
+            ])
+
+    table = Table(
+        answer_table_data,
+        colWidths=[60 * mm, 110 * mm]
+    )
 
     table.setStyle(TableStyle([
         ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
