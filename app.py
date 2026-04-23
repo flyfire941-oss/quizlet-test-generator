@@ -1,3 +1,5 @@
+# app.py
+
 import streamlit as st
 import streamlit.components.v1 as components
 
@@ -32,16 +34,19 @@ if language == "English":
         "The first word is the term.\n"
         "The second is the translation or definition.\n"
         "Use a space, hyphen (-), or TAB.\n\n"
+        "For phrases and definitions in the same language,\n"
+        "please use TAB or hyphen (-).\n\n"
         "Example:\n"
         "cat - кот\n"
-        "apple яблоко"
+        "apple яблоко\n"
+        "to go down a storm - to be successful with the audience"
     )
 
     tab_hint = "Press TAB to insert indentation inside the field"
 
     button_text = "Generate worksheet"
     warning_text = "Please enter some words first."
-    format_error = "No valid words found."
+    format_error = "For phrases and definitions, please use TAB or hyphen (-)."
     section_warning = "Please select at least one worksheet section."
 
     translate_label = "Translate"
@@ -62,16 +67,19 @@ else:
         "Первое — слово или термин.\n"
         "Второе — перевод или определение.\n"
         "Используйте пробел, дефис (-) или TAB.\n\n"
+        "Для фраз и определений на одном языке\n"
+        "используйте TAB или дефис (-).\n\n"
         "Пример:\n"
         "cat - кот\n"
-        "apple яблоко"
+        "apple яблоко\n"
+        "to go down a storm - to be successful with the audience"
     )
 
     tab_hint = "Нажмите TAB для вставки отступа внутри поля"
 
     button_text = "Сгенерировать"
     warning_text = "Введите слова."
-    format_error = "Ошибка формата."
+    format_error = "Для фраз и определений используйте TAB или дефис (-)."
     section_warning = "Выберите хотя бы один раздел."
 
     translate_label = "Переведите"
