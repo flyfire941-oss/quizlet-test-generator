@@ -162,11 +162,16 @@ def generate_pdf(translate, write, discuss, answers, language, selected_sections
     content.append(Paragraph(a_title, section_style))
     content.append(Spacer(1, 8))
 
-    answer_table_data = [
-        [a.split(" - ")[0], a.split(" - ")[1]]
-        for a in answers.split("\n")
-    ]
+    answer_table_data = []
 
+for a in answers.split("\n"):
+    if " - " in a:
+        left, right = a.split(" - ", 1)
+
+        answer_table_data.append([
+            Paragraph(left, normal_style),
+            Paragraph(right, normal_style)
+        ])
     table = Table(answer_table_data, colWidths=[80 * mm, None])
 
     table.setStyle(TableStyle([
