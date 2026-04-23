@@ -16,29 +16,14 @@ language = st.radio(
 
 st.divider()
 
-# === ВЫБОР ЗАДАНИЙ ===
-st.subheader("Worksheet sections")
-
-include_translate = st.checkbox("Translation", value=True)
-include_write = st.checkbox("Writing", value=True)
-include_discuss = st.checkbox("Speaking", value=True)
-
-selected_sections = []
-
-if include_translate:
-    selected_sections.append("Translation")
-
-if include_write:
-    selected_sections.append("Writing")
-
-if include_discuss:
-    selected_sections.append("Speaking")
-
-st.divider()
-
-# === ТЕКСТЫ ===
+# === ТЕКСТЫ ПО ЯЗЫКУ ===
 if language == "English":
     st.caption("Create printable classroom activities quickly and easily")
+
+    sections_title = "Worksheet sections"
+    translate_checkbox = "Translation"
+    write_checkbox = "Writing"
+    discuss_checkbox = "Speaking"
 
     instructions = (
         "Enter one word pair per line.\n"
@@ -63,6 +48,11 @@ if language == "English":
 else:
     st.caption("Создавайте задания для уроков быстро и удобно")
 
+    sections_title = "Разделы задания"
+    translate_checkbox = "Перевод"
+    write_checkbox = "Письменная часть"
+    discuss_checkbox = "Устная часть"
+
     instructions = (
         "Введите одну пару слов на строку.\n"
         "Первое — слово или термин.\n"
@@ -82,6 +72,26 @@ else:
     write_label = "Напишите"
     discuss_label = "Обсудите"
     answer_label = "🔑 Ответы"
+
+# === ВЫБОР ЗАДАНИЙ ===
+st.subheader(sections_title)
+
+include_translate = st.checkbox(translate_checkbox, value=True)
+include_write = st.checkbox(write_checkbox, value=True)
+include_discuss = st.checkbox(discuss_checkbox, value=True)
+
+selected_sections = []
+
+if include_translate:
+    selected_sections.append("Translation")
+
+if include_write:
+    selected_sections.append("Writing")
+
+if include_discuss:
+    selected_sections.append("Speaking")
+
+st.divider()
 
 # === INPUT ===
 st.markdown("### Input")
