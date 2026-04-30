@@ -29,7 +29,7 @@ if language == "English":
         "Enter one word pair per line.\n"
         "The first word is the term.\n"
         "The second is the translation or definition.\n"
-        "Use a space, hyphen (-), or TAB.\n\n"
+        "Use a space or hyphen (-).\n\n"
         "Example:\n"
         "cat - кот\n"
         "apple яблоко"
@@ -57,7 +57,7 @@ else:
         "Введите одну пару слов на строку.\n"
         "Первое — слово или термин.\n"
         "Второе — перевод или определение.\n"
-        "Используйте пробел, дефис (-) или TAB.\n\n"
+        "Используйте пробел или дефис (-).\n\n"
         "Пример:\n"
         "cat - кот\n"
         "apple яблоко"
@@ -98,9 +98,6 @@ st.markdown("### Input")
 st.write(instructions)
 
 words_input = st.text_area("", height=280)
-
-# 👉 ВАЖНО: заменяем TAB на пробел
-words_input = words_input.replace("\t", " ")
 
 st.divider()
 
