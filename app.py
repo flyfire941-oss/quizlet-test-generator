@@ -1,8 +1,4 @@
-# app.py
-
 import streamlit as st
-import streamlit.components.v1 as components
-
 from generator import parse_words, generate_tasks, generate_pdf
 
 st.set_page_config(
@@ -34,19 +30,14 @@ if language == "English":
         "The first word is the term.\n"
         "The second is the translation or definition.\n"
         "Use a space, hyphen (-), or TAB.\n\n"
-        "For phrases and definitions in the same language,\n"
-        "please use TAB or hyphen (-).\n\n"
         "Example:\n"
         "cat - кот\n"
-        "apple яблоко\n"
-        "to go down a storm - to be successful with the audience"
+        "apple яблоко"
     )
-
-    tab_hint = "Press TAB to insert indentation inside the field"
 
     button_text = "Generate worksheet"
     warning_text = "Please enter some words first."
-    format_error = "For phrases and definitions, please use TAB or hyphen (-)."
+    format_error = "No valid words found."
     section_warning = "Please select at least one worksheet section."
 
     translate_label = "Translate"
@@ -67,19 +58,14 @@ else:
         "Первое — слово или термин.\n"
         "Второе — перевод или определение.\n"
         "Используйте пробел, дефис (-) или TAB.\n\n"
-        "Для фраз и определений на одном языке\n"
-        "используйте TAB или дефис (-).\n\n"
         "Пример:\n"
         "cat - кот\n"
-        "apple яблоко\n"
-        "to go down a storm - to be successful with the audience"
+        "apple яблоко"
     )
-
-    tab_hint = "Нажмите TAB для вставки отступа внутри поля"
 
     button_text = "Сгенерировать"
     warning_text = "Введите слова."
-    format_error = "Для фраз и определений используйте TAB или дефис (-)."
+    format_error = "Ошибка формата."
     section_warning = "Выберите хотя бы один раздел."
 
     translate_label = "Переведите"
@@ -111,45 +97,10 @@ st.divider()
 st.markdown("### Input")
 st.write(instructions)
 
-words_input = st.text_area(
-    "",
-    height=280,
-    key="words_input"
-)
+words_input = st.text_area("", height=280)
 
-st.caption(tab_hint)
-
-# === TAB SUPPORT ===
-components.html(
-    """
-    <script>
-    const textarea = window.parent.document.querySelector('textarea');
-
-    if (textarea && !textarea.dataset.tabEnabled) {
-        textarea.dataset.tabEnabled = "true";
-
-        textarea.addEventListener('keydown', function(e) {
-            if (e.key === 'Tab') {
-                e.preventDefault();
-
-                const start = this.selectionStart;
-                const end = this.selectionEnd;
-
-                this.value =
-                    this.value.substring(0, start) +
-                    "\\t" +
-                    this.value.substring(end);
-
-                this.selectionStart = this.selectionEnd = start + 1;
-
-                this.dispatchEvent(new Event('input', { bubbles: true }));
-            }
-        });
-    }
-    </script>
-    """,
-    height=0,
-)
+# 👉 ВАЖНО: заменяем TAB на пробел
+words_input = words_input.replace("\t", " ")
 
 st.divider()
 
